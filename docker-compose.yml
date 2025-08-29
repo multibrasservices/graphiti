@@ -2,12 +2,13 @@ services:
   graph:
     build:
       context: .
-    # CETTE LIGNE DOIT ÊTRE SUPPRIMÉE (comme précédemment)
-    # ports:
-    #   - "8001:8000" 
-    # AJOUTEZ CES LIGNES pour indiquer le port interne
     expose:
       - "8000"
+    # AJOUTEZ CES LIGNES pour indiquer le port cible au reverse proxy de Coolify
+    labels:
+      - "coolify.port=8000"
+      # Au cas où Coolify utilise Traefik comme reverse proxy, cette ligne est utile
+      - "traefik.http.services.graph.loadbalancer.server.port=8000"
     healthcheck:
       test:
         [
