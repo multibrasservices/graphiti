@@ -2,8 +2,9 @@ services:
   graph:
     build:
       context: .
-    ports:
-      - "8001:8000"
+    # SUPPRIMER CETTE LIGNE, Coolify gérera le routage interne via le domaine
+    # ports:
+    #   - "8001:8000" 
     healthcheck:
       test:
         [
