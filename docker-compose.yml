@@ -2,9 +2,12 @@ services:
   graph:
     build:
       context: .
-    # SUPPRIMER CETTE LIGNE, Coolify gérera le routage interne via le domaine
+    # CETTE LIGNE DOIT ÊTRE SUPPRIMÉE (comme précédemment)
     # ports:
     #   - "8001:8000" 
+    # AJOUTEZ CES LIGNES pour indiquer le port interne
+    expose:
+      - "8000"
     healthcheck:
       test:
         [
@@ -22,9 +25,7 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - NEO4J_URI=bolt://neo4j:7687
-      # On utilise la nouvelle variable pour l'utilisateur
       - NEO4J_USER=${GRAPH_SERVICE_USER}
-      # On utilise la nouvelle variable pour le mot de passe
       - NEO4J_PASSWORD=${GRAPH_SERVICE_PASSWORD}
       - PORT=8000
   neo4j:
@@ -40,8 +41,8 @@ services:
       retries: 10
       start_period: 5s
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "7474:7474" # HTTP
+      - "7687:7687" # Bolt
     volumes:
       - neo4j_data:/data
     environment:
