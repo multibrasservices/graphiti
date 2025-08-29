@@ -24,8 +24,6 @@ from logging import INFO
 from dotenv import load_dotenv
 
 from graphiti_core import Graphiti
-from graphiti_core.llm_client.config import LLMConfig
-from graphiti_core.llm_client.openai_generic_client import OpenAIGenericClient
 from graphiti_core.nodes import EpisodeType
 from graphiti_core.search.search_config_recipes import NODE_HYBRID_SEARCH_RRF
 
@@ -65,26 +63,8 @@ async def main():
     # functionality
     #################################################
 
-    # Initialize Graphiti with Neo4j connection and Perplexity LLM
-    # IMPORTANT: Set the PERPLEXITY_API_KEY environment variable before running this script
-    # export PERPLEXITY_API_KEY="your-perplexity-api-key"
-    perplexity_api_key = os.environ.get("PERPLEXITY_API_KEY")
-    if not perplexity_api_key:
-        raise ValueError("PERPLEXITY_API_KEY must be set in your environment")
-
-    llm_config = LLMConfig(
-        api_key=perplexity_api_key,
-        model="sonar-pro",
-        base_url="https://api.perplexity.ai",
-    )
-    llm_client = OpenAIGenericClient(config=llm_config)
-
-    graphiti = Graphiti(
-        neo4j_uri,
-        neo4j_user,
-        neo4j_password,
-        llm_client=llm_client,
-    )
+    # Initialize Graphiti with Neo4j connection
+    graphiti = Graphiti(neo4j_uri, neo4j_user, neo4j_password)
 
     try:
         # Initialize the graph database with graphiti's indices. This only needs to be done once.
