@@ -1,4 +1,4 @@
-# docker-compose.yml - Version finale et sécurisée
+# docker-compose.yml - Version finale, propre et sécurisée
 
 services:
   graph:
@@ -28,7 +28,6 @@ services:
       - NEO4J_USER=${GRAPH_SERVICE_USER}
       - NEO4J_PASSWORD=${GRAPH_SERVICE_PASSWORD}
       - PORT=8000
-      # Cette variable est nécessaire pour la sécurité de l'API que nous avons ajoutée au code.
       - GRAPHITI_API_KEY=${GRAPHITI_API_KEY}
 
   neo4j:
@@ -39,15 +38,11 @@ services:
       timeout: 10s
       retries: 10
       start_period: 5s
-    # --- MODIFICATION DE SÉCURITÉ ---
-    # La section 'ports' est désactivée pour cacher la base de données d'Internet.
-    # ports:
-    #   - "7474:7474"
-    #   - "7687:7687"
-    # On lie le port 7474 du conteneur au port 7474
-      # de l'interface localhost (127.0.0.1) du serveur.
-      # Il ne sera pas accessible depuis l'extérieur.
+    ports:
+      # On expose les ports de Neo4j UNIQUEMENT sur le localhost du serveur.
+      # Ils sont ainsi accessibles pour un tunnel SSH, mais invisibles depuis Internet.
       - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
     volumes:
       - neo4j_data:/data
     environment:
