@@ -1,14 +1,27 @@
+# docker-compose.yml mis à jour pour Coolify
+
 services:
   graph:
     build:
       context: .
-    ports:
-      - "8001:8000" # On garde le port externe pour l'instant, car le FQDN ne fonctionne pas encore
+    # --- MODIFICATION CLÉ ---
+    # La section 'ports' est supprimée. En la retirant, on empêche Docker
+    # d'exposer directement le port sur l'IP du serveur. C'est ce qui permet
+    # à Coolify de prendre le contrôle du trafic et d'appliquer le HTTPS.
+    #
+    # ports:
+    #   - "8001:8000"  <-- LIGNE SUPPRIMÉE
+
+    # 'expose' est suffisant. Il déclare que le port 8000 est accessible
+    # DEPUIS les autres conteneurs du même réseau, mais PAS depuis l'extérieur.
     expose:
       - "8000"
+
+    # Le label 'coolify.port' est une bonne pratique pour aider Coolify à
+    # détecter le port, même si c'est souvent automatique.
     labels:
       - "coolify.port=8000"
-      - "traefik.http.services.graph.loadbalancer.server.port=8000"
+
     healthcheck:
       test:
         [
@@ -29,9 +42,9 @@ services:
       - NEO4J_USER=${GRAPH_SERVICE_USER}
       - NEO4J_PASSWORD=${GRAPH_SERVICE_PASSWORD}
       - PORT=8000
+
   neo4j:
-    # CHANGEMENT ICI : Mettre à jour la version de Neo4j
-    image: neo4j:5.26.2 
+    image: neo4j:5.26.2
     healthcheck:
       test:
         [
@@ -42,9 +55,16 @@ services:
       timeout: 10s
       retries: 10
       start_period: 5s
+
+    # --- RECOMMANDATION DE SÉCURITÉ ---
+    # Pour la production, il est fortement conseillé de supprimer également
+    # cette section 'ports'. N'exposez jamais une base de données directement
+    # sur Internet. Pour y accéder, privilégiez un tunnel SSH comme nous l'avons fait.
+    # Je les laisse ici pour le développement, mais gardez cela en tête.
     ports:
       - "7474:7474" # HTTP
       - "7687:7687" # Bolt
+
     volumes:
       - neo4j_data:/data
     environment:
