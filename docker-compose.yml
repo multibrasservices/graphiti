@@ -1,31 +1,31 @@
-# docker-compose.yml - Version finale avec proxy Caddy interne
+# docker-compose.yml - Version avec syntaxe de volume explicite
 
 services:
-  # NOUVEAU SERVICE : Notre proxy de sécurité interne
   caddy:
     image: caddy:latest
     restart: unless-stopped
     depends_on:
       - graph
-    # On expose le port 80 de ce conteneur. C'est ici que Coolify va se connecter.
     expose:
       - "80"
-    # On monte notre fichier de configuration Caddyfile dans le conteneur.
+    
+    # --- MODIFICATION ICI ---
+    # On utilise la syntaxe "longue" pour être plus clair avec Docker.
+    # Cela spécifie explicitement que c'est un montage de type "bind".
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-    # On lui passe les variables d'environnement pour l'authentification.
+      - type: bind
+        source: ./Caddyfile
+        target: /etc/caddy/Caddyfile
+        
     environment:
       - BASIC_AUTH_USER=${BASIC_AUTH_USER}
       - BASIC_AUTH_PASS=${BASIC_AUTH_PASS}
-    # On ajoute un label pour que Coolify sache quel port utiliser.
     labels:
       - "coolify.port=80"
 
   graph:
     build:
       context: .
-    # MODIFICATION : Le service graph n'est plus exposé à l'extérieur.
-    # Seul notre service 'caddy' peut lui parler. On retire les labels.
     expose:
       - "8000"
     healthcheck:
@@ -63,7 +63,9 @@ services:
     volumes:
       - neo4j_data:/data
     environment:
-      - NEO_AUTH=${NEO4J_AUTH}
+      # --- CORRECTION DE FAUTE DE FRAPPE ICI ---
+      # J'avais écrit NEO_AUTH, le nom correct est NEO4J_AUTH.
+      - NEO4J_AUTH=${NEO4J_AUTH}
 
 volumes:
   neo4j_data:
