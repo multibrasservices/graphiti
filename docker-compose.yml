@@ -44,6 +44,10 @@ services:
     # ports:
     #   - "7474:7474"
     #   - "7687:7687"
+    # On lie le port 7474 du conteneur au port 7474
+      # de l'interface localhost (127.0.0.1) du serveur.
+      # Il ne sera pas accessible depuis l'extérieur.
+      - "127.0.0.1:7474:7474"
     volumes:
       - neo4j_data:/data
     environment:
