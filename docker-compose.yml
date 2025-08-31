@@ -1,10 +1,7 @@
-# docker-compose.yml - Version finale avec image Caddy personnalisée
+# docker-compose.yml - Version finale avec healthcheck pour Caddy
 
 services:
   caddy:
-    # --- MODIFICATION CLÉ ICI ---
-    # Au lieu de 'image: caddy:latest', on dit à Docker de construire
-    # une image en utilisant le Dockerfile qui se trouve dans le dossier ./caddy_config
     build:
       context: ./caddy_config
     restart: unless-stopped
@@ -12,12 +9,21 @@ services:
       - graph
     expose:
       - "80"
-    # On n'a plus besoin de la section 'volumes', car le fichier est déjà dans l'image.
+    # On n'a plus besoin de la section 'volumes'.
     environment:
       - BASIC_AUTH_USER=${BASIC_AUTH_USER}
       - BASIC_AUTH_PASS=${BASIC_AUTH_PASS}
     labels:
       - "coolify.port=80"
+      
+    # --- AJOUT ICI ---
+    # On dit à Coolify comment vérifier que Caddy est en vie.
+    # On essaie simplement de se connecter au port 80.
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   graph:
     build:
@@ -62,4 +68,13 @@ services:
       - NEO4J_AUTH=${NEO4J_AUTH}
 
 volumes:
-  neo4j_data:
+  neo4j_data:```
+
+#### Actions Finales
+
+1.  **Mettez à jour votre `docker-compose.yml`** sur GitHub avec ce dernier code.
+2.  **Redéployez sur Coolify.**
+
+Cette fois, Coolify va démarrer le conteneur Caddy, puis il va utiliser la commande `curl` pour vérifier qu'il répond bien. Une fois que le healthcheck sera "healthy", il le connectera à son proxy principal. L'erreur 502 disparaîtra et sera remplacée par la fenêtre d'authentification.
+
+C'est la toute dernière étape. Nous avons éliminé tous les problèmes un par un.
