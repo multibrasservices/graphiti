@@ -1,13 +1,11 @@
-# docker-compose.yml - Version finale simplifiée
+# docker-compose.yml - Version finale et sécurisée
 
 services:
   graph:
     build:
       context: .
-    # On expose le port 8000 pour que Coolify puisse le trouver
     expose:
       - "8000"
-    # On dit explicitement à Coolify quel port utiliser
     labels:
       - "coolify.port=8000"
     healthcheck:
@@ -30,6 +28,8 @@ services:
       - NEO4J_USER=${GRAPH_SERVICE_USER}
       - NEO4J_PASSWORD=${GRAPH_SERVICE_PASSWORD}
       - PORT=8000
+      # Cette variable est nécessaire pour la sécurité de l'API que nous avons ajoutée au code.
+      - GRAPHITI_API_KEY=${GRAPHITI_API_KEY}
 
   neo4j:
     image: neo4j:5.26.2
@@ -39,9 +39,11 @@ services:
       timeout: 10s
       retries: 10
       start_period: 5s
-    ports:
-      - "7474:7474"
-      - "7687:7687"
+    # --- MODIFICATION DE SÉCURITÉ ---
+    # La section 'ports' est désactivée pour cacher la base de données d'Internet.
+    # ports:
+    #   - "7474:7474"
+    #   - "7687:7687"
     volumes:
       - neo4j_data:/data
     environment:
