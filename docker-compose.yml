@@ -1,26 +1,23 @@
-# docker-compose.yml mis à jour pour Coolify
+# docker-compose.yml mis à jour pour Coolify avec authentification simple
 
 services:
   graph:
     build:
       context: .
-    # --- MODIFICATION CLÉ ---
-    # La section 'ports' est supprimée. En la retirant, on empêche Docker
-    # d'exposer directement le port sur l'IP du serveur. C'est ce qui permet
-    # à Coolify de prendre le contrôle du trafic et d'appliquer le HTTPS.
-    #
-    # ports:
-    #   - "8001:8000"  <-- LIGNE SUPPRIMÉE
-
-    # 'expose' est suffisant. Il déclare que le port 8000 est accessible
-    # DEPUIS les autres conteneurs du même réseau, mais PAS depuis l'extérieur.
     expose:
       - "8000"
 
-    # Le label 'coolify.port' est une bonne pratique pour aider Coolify à
-    # détecter le port, même si c'est souvent automatique.
+    # --- AJOUT DE LA SÉCURITÉ ICI ---
+    # Ces labels donnent des instructions directement au reverse proxy Caddy de Coolify.
     labels:
       - "coolify.port=8000"
+      # Ouvre un bloc de configuration pour l'authentification basique.
+      - "coolify.caddy.1=basicauth {"
+      # Demande à Caddy d'utiliser les variables d'environnement que nous avons définies.
+      - "coolify.caddy.2=  {env.BASIC_AUTH_USER} {env.BASIC_AUTH_PASS}"
+      # Ferme le bloc de configuration.
+      - "coolify.caddy.3=}"
+      # --- FIN DE L'AJOUT ---
 
     healthcheck:
       test:
@@ -55,16 +52,9 @@ services:
       timeout: 10s
       retries: 10
       start_period: 5s
-
-    # --- RECOMMANDATION DE SÉCURITÉ ---
-    # Pour la production, il est fortement conseillé de supprimer également
-    # cette section 'ports'. N'exposez jamais une base de données directement
-    # sur Internet. Pour y accéder, privilégiez un tunnel SSH comme nous l'avons fait.
-    # Je les laisse ici pour le développement, mais gardez cela en tête.
     ports:
-      - "7474:7474" # HTTP
-      - "7687:7687" # Bolt
-
+      - "7474:7474"
+      - "7687:7687"
     volumes:
       - neo4j_data:/data
     environment:
