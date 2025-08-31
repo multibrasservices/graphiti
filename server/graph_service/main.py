@@ -1,4 +1,4 @@
-# server/graph_service/main.py - VERSION FINALE ADAPTÉE À VOTRE PROJET
+# server/graph_service/main.py - VERSION FINALE AVEC HEALTHCHECK PUBLIC
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Security, HTTPException, status
@@ -7,8 +7,6 @@ from fastapi.responses import JSONResponse
 
 from graph_service.config import get_settings
 from graph_service.routers import ingest, retrieve
-# --- CORRECTION FINALE DE L'IMPORT ---
-# On importe depuis le fichier zep_graphiti.py
 from graph_service.zep_graphiti import initialize_graphiti
 
 # --- DÉBUT DE LA SÉCURITÉ ---
@@ -39,13 +37,19 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, dependencies=[Security(get_api_key)])
+# On crée l'application SANS la sécurité pour l'instant
+app = FastAPI(lifespan=lifespan)
 
 
-app.include_router(retrieve.router)
-app.include_router(ingest.router)
-
-
+# --- CORRECTION ICI ---
+# On déplace le healthcheck AVANT d'inclure les routeurs sécurisés.
+# Il ne sera donc pas protégé par la dépendance.
 @app.get('/healthcheck', include_in_schema=False)
 async def healthcheck():
     return JSONResponse(content={'status': 'healthy'}, status_code=200)
+
+
+# Maintenant, on inclut les routeurs qui ont besoin de sécurité,
+# en leur appliquant notre "videur" directement.
+app.include_router(retrieve.router, dependencies=[Security(get_api_key)])
+app.include_router(ingest.router, dependencies=[Security(get_api_key)])
