@@ -1,4 +1,4 @@
-# docker-compose.yml - Version finale avec montage de dossier
+# docker-compose.yml - Version de débogage avec montage de fichier explicite
 
 services:
   caddy:
@@ -9,13 +9,11 @@ services:
     expose:
       - "80"
     
-    # --- MODIFICATION CLÉ ICI ---
-    # On monte le dossier 'caddy_config' entier vers le dossier de configuration de Caddy.
-    # Caddy trouvera automatiquement le Caddyfile à l'intérieur.
+    # On revient au montage de fichier, mais en gardant la syntaxe longue.
     volumes:
       - type: bind
-        source: ./caddy_config
-        target: /etc/caddy
+        source: ./caddy_config/Caddyfile
+        target: /etc/caddy/Caddyfile
         
     environment:
       - BASIC_AUTH_USER=${BASIC_AUTH_USER}
@@ -24,6 +22,7 @@ services:
       - "coolify.port=80"
 
   graph:
+    # ... (le service graph ne change pas)
     build:
       context: .
     expose:
@@ -50,6 +49,7 @@ services:
       - PORT=8000
 
   neo4j:
+    # ... (le service neo4j ne change pas)
     image: neo4j:5.26.2
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1"]
