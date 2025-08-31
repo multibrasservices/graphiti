@@ -1,28 +1,15 @@
-services:
-  caddy:
-    build:
-      context: ./caddy_config
-    restart: unless-stopped
-    depends_on:
-      - graph
-    expose:
-      - "80"
-    environment:
-      - BASIC_AUTH_USER=${BASIC_AUTH_USER}
-      - BASIC_AUTH_PASS=${BASIC_AUTH_PASS}
-    labels:
-      - "coolify.port=80"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# docker-compose.yml - Version finale simplifiée
 
+services:
   graph:
     build:
       context: .
+    # On expose le port 8000 pour que Coolify puisse le trouver
     expose:
       - "8000"
+    # On dit explicitement à Coolify quel port utiliser
+    labels:
+      - "coolify.port=8000"
     healthcheck:
       test:
         [
