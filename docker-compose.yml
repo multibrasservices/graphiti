@@ -1,21 +1,33 @@
-# docker-compose.yml - Version finale avec authentification statique (infaillible)
+# docker-compose.yml - Version finale avec proxy Caddy interne
 
 services:
+  # NOUVEAU SERVICE : Notre proxy de sécurité interne
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    depends_on:
+      - graph
+    # On expose le port 80 de ce conteneur. C'est ici que Coolify va se connecter.
+    expose:
+      - "80"
+    # On monte notre fichier de configuration Caddyfile dans le conteneur.
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    # On lui passe les variables d'environnement pour l'authentification.
+    environment:
+      - BASIC_AUTH_USER=${BASIC_AUTH_USER}
+      - BASIC_AUTH_PASS=${BASIC_AUTH_PASS}
+    # On ajoute un label pour que Coolify sache quel port utiliser.
+    labels:
+      - "coolify.port=80"
+
   graph:
     build:
       context: .
+    # MODIFICATION : Le service graph n'est plus exposé à l'extérieur.
+    # Seul notre service 'caddy' peut lui parler. On retire les labels.
     expose:
       - "8000"
-
-    # --- SÉCURITÉ STATIQUE ---
-    labels:
-      - "coolify.port=8000"
-      - "coolify.caddy.1=basicauth {"
-      # L'utilisateur 'admin' et votre mot de passe haché sont ici :
-      - "coolify.caddy.2=  admin $2a$14$c2f/n2hWb65KRMF0miXwteKu8Oj9hOfGD7RyItXftu/QbsKiW.7eO"
-      - "coolify.caddy.3=}"
-      # --- FIN DE LA SECTION SÉCURITÉ ---
-
     healthcheck:
       test:
         [
@@ -51,7 +63,7 @@ services:
     volumes:
       - neo4j_data:/data
     environment:
-      - NEO4J_AUTH=${NEO4J_AUTH}
+      - NEO_AUTH=${NEO4J_AUTH}
 
 volumes:
   neo4j_data:
