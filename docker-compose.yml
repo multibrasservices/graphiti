@@ -1,20 +1,18 @@
-# docker-compose.yml - Version de débogage avec montage de fichier explicite
+# docker-compose.yml - Version finale avec image Caddy personnalisée
 
 services:
   caddy:
-    image: caddy:latest
+    # --- MODIFICATION CLÉ ICI ---
+    # Au lieu de 'image: caddy:latest', on dit à Docker de construire
+    # une image en utilisant le Dockerfile qui se trouve dans le dossier ./caddy_config
+    build:
+      context: ./caddy_config
     restart: unless-stopped
     depends_on:
       - graph
     expose:
       - "80"
-    
-    # On revient au montage de fichier, mais en gardant la syntaxe longue.
-    volumes:
-      - type: bind
-        source: ./caddy_config/Caddyfile
-        target: /etc/caddy/Caddyfile
-        
+    # On n'a plus besoin de la section 'volumes', car le fichier est déjà dans l'image.
     environment:
       - BASIC_AUTH_USER=${BASIC_AUTH_USER}
       - BASIC_AUTH_PASS=${BASIC_AUTH_PASS}
@@ -22,7 +20,6 @@ services:
       - "coolify.port=80"
 
   graph:
-    # ... (le service graph ne change pas)
     build:
       context: .
     expose:
@@ -49,7 +46,6 @@ services:
       - PORT=8000
 
   neo4j:
-    # ... (le service neo4j ne change pas)
     image: neo4j:5.26.2
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1"]
