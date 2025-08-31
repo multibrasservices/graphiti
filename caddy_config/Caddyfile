@@ -3,10 +3,9 @@
 }
 
 :80 {
-    # --- CORRECTION ICI ---
-    # On remplace 'basicauth' par 'basic_auth'
     basic_auth {
-        {env.BASIC_AUTH_USER} {env.BASIC_AUTH_PASS}
+        # On met les identifiants directement ici pour le test
+        admin BtKz8QaR8jqn6sdsrv4TezwURsFxFdY8
     }
     
     reverse_proxy graph:8000
