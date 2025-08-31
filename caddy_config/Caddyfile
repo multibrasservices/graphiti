@@ -1,17 +1,13 @@
 {
-    # On dit à Caddy de ne pas essayer de gérer le HTTPS, Coolify s'en occupe déjà.
     auto_https off
 }
 
 :80 {
-    # On active l'authentification basique.
-    basicauth {
-        # On lui dit de lire le nom d'utilisateur et le mot de passe
-        # depuis les variables d'environnement.
+    # --- CORRECTION ICI ---
+    # On remplace 'basicauth' par 'basic_auth'
+    basic_auth {
         {env.BASIC_AUTH_USER} {env.BASIC_AUTH_PASS}
     }
     
-    # Une fois l'authentification réussie, on transfère le trafic
-    # au service 'graph' sur son port 8000.
     reverse_proxy graph:8000
 }
