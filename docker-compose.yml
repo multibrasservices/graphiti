@@ -1,4 +1,4 @@
-# docker-compose.yml - Version avec syntaxe de volume explicite
+# docker-compose.yml - Version finale avec montage de dossier
 
 services:
   caddy:
@@ -9,13 +9,13 @@ services:
     expose:
       - "80"
     
-    # --- MODIFICATION ICI ---
-    # On utilise la syntaxe "longue" pour être plus clair avec Docker.
-    # Cela spécifie explicitement que c'est un montage de type "bind".
+    # --- MODIFICATION CLÉ ICI ---
+    # On monte le dossier 'caddy_config' entier vers le dossier de configuration de Caddy.
+    # Caddy trouvera automatiquement le Caddyfile à l'intérieur.
     volumes:
       - type: bind
-        source: ./Caddyfile
-        target: /etc/caddy/Caddyfile
+        source: ./caddy_config
+        target: /etc/caddy
         
     environment:
       - BASIC_AUTH_USER=${BASIC_AUTH_USER}
@@ -63,8 +63,6 @@ services:
     volumes:
       - neo4j_data:/data
     environment:
-      # --- CORRECTION DE FAUTE DE FRAPPE ICI ---
-      # J'avais écrit NEO_AUTH, le nom correct est NEO4J_AUTH.
       - NEO4J_AUTH=${NEO4J_AUTH}
 
 volumes:
