@@ -1,4 +1,4 @@
-# server/graph_service/main.py - VERSION CORRIGÉE
+# server/graph_service/main.py - VERSION FINALE ADAPTÉE À VOTRE PROJET
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Security, HTTPException, status
@@ -7,10 +7,11 @@ from fastapi.responses import JSONResponse
 
 from graph_service.config import get_settings
 from graph_service.routers import ingest, retrieve
-# --- CORRECTION DE LA FAUTE DE FRAPPE ICI ---
-from graph_service.zep.graphiti import initialize_graphiti
+# --- CORRECTION FINALE DE L'IMPORT ---
+# On importe depuis le fichier zep_graphiti.py
+from graph_service.zep_graphiti import initialize_graphiti
 
-# --- DÉBUT DE L'AJOUT DE SÉCURITÉ ---
+# --- DÉBUT DE LA SÉCURITÉ ---
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
@@ -28,7 +29,7 @@ async def get_api_key(api_key: str = Security(api_key_header)):
             detail="Invalid or missing API Key",
         )
 
-# --- FIN DE L'AJOUT DE SÉCURITÉ ---
+# --- FIN DE LA SÉCURITÉ ---
 
 
 @asynccontextmanager
